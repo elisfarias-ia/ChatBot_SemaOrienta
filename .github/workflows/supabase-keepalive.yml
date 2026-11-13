@@ -1,0 +1,34 @@
+name: Supabase — manter ativo
+
+# Projetos gratuitos do Supabase pausam após ~7 dias sem atividade.
+# Uma consulta simples a cada 3 dias evita a pausa.
+# Obs.: o GitHub desativa workflows agendados após 60 dias sem commits no repositório.
+on:
+  schedule:
+    - cron: "17 12 */3 * *" # a cada 3 dias, 12:17 UTC (08:17 em Cuiabá)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Consulta simples no banco
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.1.0
+
+      - name: Vincular ao projeto
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: select 1
+        run: supabase db query --remote --read-only "select 1 as ok, now() as em"

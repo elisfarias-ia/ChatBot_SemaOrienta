@@ -15,7 +15,10 @@
     "format:check": "prettier --check .",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "health:supabase": "node --env-file=.env.local scripts/health-check.mjs",
+    "db:push": "supabase db push",
+    "db:new": "supabase migration new"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -47,6 +50,7 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.10.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "supabase": "^3.1.0",
     "tailwindcss": "4.3.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.12"

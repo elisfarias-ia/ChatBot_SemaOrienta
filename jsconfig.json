@@ -24,7 +24,8 @@
     "src/**/*.jsx",
     "tests/**/*.js",
     "*.config.mjs",
-    "*.config.js"
+    "*.config.js",
+    "scripts/**/*.mjs"
   ],
   "exclude": ["node_modules", ".next", "out", "build"]
 }

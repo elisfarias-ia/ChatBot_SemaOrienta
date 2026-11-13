@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body
+    style="
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #1a1a1a;
+    "
+  >
+    <h1 style="font-size: 20px">Acesse o painel do Assistente SEMA-MT</h1>
+    <p>Olá!</p>
+    <p>Recebemos um pedido para entrar no painel. Para continuar, clique no botão abaixo:</p>
+    <p>
+      <a
+        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/admin"
+        style="
+          display: inline-block;
+          padding: 12px 20px;
+          background: #166534;
+          color: #ffffff;
+          text-decoration: none;
+          border-radius: 6px;
+        "
+        >Entrar no painel</a
+      >
+    </p>
+    <p>Ou digite este código: <strong>{{ .Token }}</strong></p>
+    <p>O link vale por <strong>15 minutos</strong> e só pode ser usado uma vez.</p>
+    <p>Se você não pediu este acesso, ignore este e-mail. Ninguém entra sem clicar no link.</p>
+    <hr />
+    <p style="font-size: 13px; color: #555">
+      Secretaria de Estado de Meio Ambiente de Mato Grosso (SEMA-MT). Mensagem automática, não
+      responda.
+    </p>
+  </body>
+</html>

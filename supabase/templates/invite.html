@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body
+    style="
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #1a1a1a;
+    "
+  >
+    <h1 style="font-size: 20px">Convite para o painel do Assistente SEMA-MT</h1>
+    <p>Olá!</p>
+    <p>
+      Você foi convidado(a) para administrar as fontes do Assistente SEMA-MT. Para aceitar, clique
+      no botão abaixo:
+    </p>
+    <p>
+      <a
+        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/admin"
+        style="
+          display: inline-block;
+          padding: 12px 20px;
+          background: #166534;
+          color: #ffffff;
+          text-decoration: none;
+          border-radius: 6px;
+        "
+        >Aceitar convite</a
+      >
+    </p>
+    <p>Depois, para entrar de novo, é só pedir um link de acesso com este mesmo e-mail.</p>
+    <p>Se você não esperava este convite, ignore este e-mail.</p>
+    <hr />
+    <p style="font-size: 13px; color: #555">
+      Secretaria de Estado de Meio Ambiente de Mato Grosso (SEMA-MT). Mensagem automática, não
+      responda.
+    </p>
+  </body>
+</html>
