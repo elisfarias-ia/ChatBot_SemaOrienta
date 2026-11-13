@@ -9,6 +9,12 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.js", "tests/unit/**/*.test.js"],
     environment: "node",
-    passWithNoTests: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      include: ["src/core/**/*.js", "src/services/**/*.js", "src/lib/**/*.js"],
+      exclude: ["**/*.test.js"],
+      thresholds: { "src/core/**": { lines: 80, functions: 80, branches: 80, statements: 80 } },
+    },
   },
 });

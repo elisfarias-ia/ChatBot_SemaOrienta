@@ -57,14 +57,26 @@ src/app       ← rotas, Server Actions, páginas e componentes de UI.
 
 ## Comandos
 
-| Comando             | O que faz                                   |
-| ------------------- | ------------------------------------------- |
-| `npm run dev`       | Servidor de desenvolvimento                 |
-| `npm run build`     | Build de produção                           |
-| `npm run lint`      | ESLint                                      |
-| `npm run typecheck` | `tsc --noEmit -p jsconfig.json` (checa JSDoc) |
-| `npm test`          | Vitest (unidade/integração)                 |
-| `npm run test:e2e`  | Playwright (e2e)                            |
+| Comando                 | O que faz                                               |
+| ----------------------- | ------------------------------------------------------- |
+| `npm run dev`           | Servidor de desenvolvimento                             |
+| `npm run build`         | Build de produção                                       |
+| `npm run lint`          | ESLint                                                  |
+| `npm run typecheck`     | `tsc --noEmit -p jsconfig.json` (checa JSDoc)           |
+| `npm run lint:fix`      | ESLint com correção automática                          |
+| `npm run format`        | Prettier em todo o projeto (`format:check` só verifica) |
+| `npm test`              | Vitest (unidade/integração)                             |
+| `npm run test:coverage` | Vitest com cobertura v8 (mínimo 80% em `src/core`)      |
+| `npm run test:e2e`      | Playwright (e2e, projetos `mobile` Pixel 7 e `desktop`) |
+
+Hooks (Husky): `pre-commit` roda lint-staged (ESLint + Prettier nos arquivos alterados); `commit-msg` roda commitlint (Conventional Commits).
+
+## Exceções e observações
+
+- `src/components/ui/**` é código **gerado pelo shadcn/ui** (estilo `base-nova`, cor base `neutral`, primitivas Base UI). Esses arquivos usam `// @ts-nocheck` em vez de `// @ts-check` para poderem ser regenerados pela CLI sem retrabalho. Não edite a lógica deles; crie componentes próprios em `src/components/` que os envolvam com JSDoc.
+- Formulários: o componente `form` do shadcn foi descontinuado no estilo atual; use `field` + `label` (já instalados).
+- Testes unitários ficam ao lado do código (`*.test.js`); e2e em `tests/e2e/`.
+- Lint garante: `src/core` não importa camadas externas/frameworks; `src/services` não importa `infra`/`app`; `process.env` só em `src/lib/env.js`.
 
 ## Regra de fechamento de tarefa
 

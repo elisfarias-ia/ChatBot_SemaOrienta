@@ -18,6 +18,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "src/**/*.js", "src/**/*.jsx", "tests/**/*.js", "*.config.mjs", "*.config.js"],
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "tests/**/*.js",
+    "*.config.mjs",
+    "*.config.js"
+  ],
   "exclude": ["node_modules", ".next", "out", "build"]
 }
