@@ -7,6 +7,7 @@
  *   node scripts/github.mjs repo:setup       permissões, delete-branch-on-merge, proteção da main
  *   node scripts/github.mjs secrets:set NOME cadastra um secret do Actions
  *   node scripts/github.mjs secrets:sync     cadastra os secrets listados em docs/setup-github.md
+ *   node scripts/github.mjs workflow:run ARQ dispara um workflow (workflow_dispatch) na main e acompanha
  *
  * Segurança do token:
  *   - obtido em tempo de execução por `git credential fill` (stdin, nunca argumento);
@@ -373,6 +374,60 @@ async function ship() {
 }
 
 // ---------------------------------------------------------------------------
+// workflow:run
+// ---------------------------------------------------------------------------
+
+/**
+ * Dispara um workflow com workflow_dispatch na main e acompanha até terminar.
+ * @param {string} file nome do arquivo em .github/workflows (ex.: supabase-migrations.yml)
+ */
+async function runWorkflow(file) {
+  if (!/^[\w.-]+\.ya?ml$/.test(file)) fail(`Arquivo de workflow inválido: ${file}`);
+  const { owner, repo } = getRepo();
+  const base = `/repos/${owner}/${repo}/actions/workflows/${file}`;
+  const startedAt = Date.now() - 5_000;
+
+  await api("POST", `${base}/dispatches`, { ref: "main" });
+  log(`→ Workflow ${file} disparado na main.`);
+
+  const timeoutMin = Number(process.env.SHIP_TIMEOUT_MIN ?? 25);
+  const pollMs = Number(process.env.SHIP_POLL_SEC ?? 15) * 1000;
+  const deadline = Date.now() + timeoutMin * 60_000;
+  /** @type {any} */
+  let run;
+  let last = "";
+
+  while (Date.now() < deadline) {
+    await sleep(pollMs);
+    if (!run) {
+      const data = await api("GET", `${base}/runs?event=workflow_dispatch&branch=main&per_page=5`);
+      run = (data.workflow_runs ?? []).find(
+        (/** @type {any} */ r) => Date.parse(r.created_at) >= startedAt,
+      );
+      if (!run) continue;
+      log(`→ Execução: ${run.html_url}`);
+    }
+    run = await api("GET", `/repos/${owner}/${repo}/actions/runs/${run.id}`);
+    if (run.status !== last) log(`… ${run.status}`);
+    last = run.status;
+    if (run.status !== "completed") continue;
+
+    if (OK_CONCLUSIONS.has(run.conclusion)) {
+      log(`✔ ${file}: ${run.conclusion}`);
+      return;
+    }
+    const jobs = await api("GET", `/repos/${owner}/${repo}/actions/runs/${run.id}/jobs`);
+    for (const job of jobs.jobs ?? []) {
+      for (const step of job.steps ?? []) {
+        if (step.conclusion === "failure") log(`✖ ${job.name} → passo "${step.name}"`);
+      }
+    }
+    fail(`${file} terminou com ${run.conclusion}. Log: ${run.html_url}`);
+  }
+  fail(`Tempo esgotado (${timeoutMin} min) esperando ${file}.`);
+}
+
+// ---------------------------------------------------------------------------
 
 const [command, arg] = process.argv.slice(2);
 
@@ -383,7 +438,11 @@ try {
     if (!arg) fail("Uso: npm run secrets:set -- NOME");
     await setSecret(arg);
   } else if (command === "secrets:sync") await syncSecrets();
-  else fail("Comandos: pr:ship | repo:setup | secrets:set NOME | secrets:sync");
+  else if (command === "workflow:run") {
+    if (!arg) fail("Uso: npm run workflow:run -- arquivo.yml");
+    await runWorkflow(arg);
+  } else
+    fail("Comandos: pr:ship | repo:setup | secrets:set NOME | secrets:sync | workflow:run ARQ");
 } catch (error) {
   fail(mask(error));
 }

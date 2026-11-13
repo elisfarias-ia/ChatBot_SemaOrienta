@@ -114,3 +114,14 @@ domínio em **Redirect URLs** (`https://<dominio>/**`). Atualize também `site_u
 - Com o cadastro público desligado, o magic link só funciona para quem **já existe** em Auth.
   Administradores entram por convite: **Authentication → Users → Add user → Send invitation**.
 - O workflow agendado é desativado pelo GitHub após 60 dias sem commits; reative em **Actions**.
+
+## Rede local bloqueia conexão direta ao Postgres
+
+Nesta rede, a conexão Postgres com TLS (porta 5432 do pooler) é derrubada no handshake
+(`ECONNRESET`), então `npx supabase db push --remote` **não funciona daqui**. O que funciona:
+
+- `npx supabase db query --remote …` e `npm run health:supabase`, que usam HTTPS;
+- aplicar migrations pelo GitHub Actions: `npm run db:migrate:ci` (ou merge na `main`).
+
+Para isso, os secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` e `SUPABASE_PROJECT_ID`
+precisam estar no repositório (`npm run secrets:sync`, ver `docs/setup-github.md`).
