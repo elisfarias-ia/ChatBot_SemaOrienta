@@ -85,10 +85,18 @@ Hooks (Husky): `pre-commit` roda lint-staged (ESLint + Prettier nos arquivos alt
 - Testes unitários ficam ao lado do código (`*.test.js`); e2e em `tests/e2e/`.
 - Lint garante: `src/core` não importa camadas externas/frameworks; `src/services` não importa `infra`/`app`; `process.env` só em `src/lib/env.js`.
 
-## Regra de fechamento de tarefa
+## Fluxo de entrega (definitivo)
 
-Ao terminar **cada** tarefa, rodar nesta ordem e só commitar se tudo passar:
+1. Trabalhar sempre numa branch `feat/*` (ou `fix/*`, `chore/*`, `docs/*`) criada a partir da `main` atualizada. Nunca commitar direto na `main` (ela é protegida: PR + checks `Qualidade e build` e `E2E (Playwright)`).
+2. Ao terminar **cada** tarefa, rodar localmente e só commitar se tudo passar:
 
-```bash
-npm run lint && npm run typecheck && npm test
-```
+   ```bash
+   npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e
+   ```
+
+3. Commit em Conventional Commits e entrega com `npm run ship` (push → PR → espera o CI → merge → limpeza das branches). Mostrar o link do PR ao final.
+4. Se o CI falhar, o ship não faz merge: corrigir na mesma branch e rodar `npm run ship` de novo.
+
+Automação do GitHub: `scripts/github.mjs` (`ship`, `repo:setup`, `secrets:set`, `secrets:sync`), usando a credencial do Git Credential Manager via `git credential fill`. O token nunca é impresso, gravado, commitado nem passado por argumento. **Não usar nem sugerir o `gh` CLI.** Guia: `docs/setup-github.md`.
+
+**Nunca pedir a quem mantém o projeto que abra o GitHub** para executar algo que os scripts fazem. Se algo realmente exigir ação humana (ex.: login no navegador, valor de segredo que só a pessoa responsável tem, decisão de negócio), explicar o motivo.
