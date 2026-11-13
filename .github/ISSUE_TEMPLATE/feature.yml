@@ -1,0 +1,30 @@
+name: Funcionalidade
+description: Sugira uma melhoria ou nova funcionalidade
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema isso resolve?
+      description: Quem é afetado (cidadão, servidor, administrador) e em que situação.
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+      description: Como você imagina a solução?
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de aceite
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas

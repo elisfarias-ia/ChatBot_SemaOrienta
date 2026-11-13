@@ -16,9 +16,10 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: "npm run dev",
+    // Em CI testa o build de produção; localmente usa o servidor de desenvolvimento.
+    command: process.env.CI ? "npm run build && npm run start" : "npm run dev",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
   },
 });

@@ -1,0 +1,49 @@
+name: Bug
+description: Algo não funciona como deveria
+title: "fix: "
+labels: [bug]
+body:
+  - type: textarea
+    id: descricao
+    attributes:
+      label: O que aconteceu?
+      description: Descreva o problema em poucas palavras.
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Como reproduzir
+      placeholder: |
+        1. Acesse ...
+        2. Clique em ...
+        3. Veja o erro
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que era esperado?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Onde?
+      options:
+        - Chat público
+        - Painel /admin
+        - Ingestão de fontes (PDF, DOCX, Google Docs, URL)
+        - Outro
+    validations:
+      required: true
+  - type: input
+    id: ambiente
+    attributes:
+      label: Dispositivo e navegador
+      placeholder: "Ex.: Android 14, Chrome 140"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Prints, logs ou pergunta feita ao chatbot
+      description: Não inclua dados pessoais nem senhas.
