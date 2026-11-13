@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Cuiaba
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      next-react:
+        patterns:
+          ["next", "eslint-config-next", "react", "react-dom", "@types/react", "@types/react-dom"]
+      testes:
+        patterns: ["vitest", "@vitest/*", "@playwright/test"]
+      lint-format:
+        patterns:
+          ["eslint", "eslint-*", "prettier", "prettier-*", "@commitlint/*", "husky", "lint-staged"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Cuiaba
+    commit-message:
+      prefix: "ci"
