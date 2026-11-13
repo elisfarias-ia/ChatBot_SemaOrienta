@@ -1,78 +1,74 @@
 # Configuração do Supabase
 
-O que já está no repositório (versionado):
+## Projeto
 
-| Item                                                                                 | Onde                                               |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------- |
-| Configuração do projeto (Auth, signup desligado, magic link 15 min, redirects, SMTP) | `supabase/config.toml`                             |
-| Templates de e-mail em pt-BR (magic link e convite)                                  | `supabase/templates/`                              |
-| Extensão `vector`                                                                    | `supabase/migrations/*_enable_vector.sql`          |
-| Bucket privado `sources` (25 MB, PDF/DOCX)                                           | `supabase/migrations/*_storage_sources_bucket.sql` |
-| Aplicar migrations na `main`                                                         | `.github/workflows/supabase-migrations.yml`        |
-| Consulta a cada 3 dias (evita pausa)                                                 | `.github/workflows/supabase-keepalive.yml`         |
-| Health check                                                                         | `npm run health:supabase`                          |
+| Item         | Valor                                      |
+| ------------ | ------------------------------------------ |
+| Nome         | `ChatBot_SemaOrienta`                      |
+| Reference ID | `cgwbfvfrohjkynvojcgl`                     |
+| URL          | `https://cgwbfvfrohjkynvojcgl.supabase.co` |
+| Região atual | `us-east-1` (ver aviso abaixo)             |
+| Postgres     | 17                                         |
 
-O Supabase CLI está instalado como dependência de desenvolvimento: use sempre `npx supabase …`.
+> **Aviso de região:** o projeto foi criado em **us-east-1 (EUA)**, não em
+> **sa-east-1 (São Paulo)**. A região não pode ser alterada depois de criada; para
+> mudar, é preciso criar um novo projeto em São Paulo e repetir este guia.
 
-## 1. Variáveis de ambiente do Windows (só para o CLI)
+## O que está no repositório
 
-Defina como variáveis **do usuário** (Iniciar → "Editar as variáveis de ambiente para sua conta")
-e reinicie o terminal/app depois:
+| Item                                                              | Onde                                               |
+| ----------------------------------------------------------------- | -------------------------------------------------- |
+| Auth: signup desligado, magic link 15 min, redirects, rate limits | `supabase/config.toml`                             |
+| Templates de e-mail em pt-BR (magic link e convite)               | `supabase/templates/`                              |
+| Extensão `vector`                                                 | `supabase/migrations/*_enable_vector.sql`          |
+| Bucket privado `sources` (25 MB, PDF/DOCX)                        | `supabase/migrations/*_storage_sources_bucket.sql` |
+| Aplicar migrations na `main`                                      | `.github/workflows/supabase-migrations.yml`        |
+| Consulta a cada 3 dias (evita pausa)                              | `.github/workflows/supabase-keepalive.yml`         |
+| Health check                                                      | `npm run health:supabase`                          |
 
-| Variável                              | De onde vem                                                                          |
-| ------------------------------------- | ------------------------------------------------------------------------------------ |
-| `SUPABASE_ACCESS_TOKEN`               | supabase.com → avatar → **Account preferences → Access Tokens → Generate new token** |
-| `SUPABASE_DB_PASSWORD`                | Senha forte criada por você (será a senha do Postgres do projeto)                    |
-| `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` | Seu provedor de e-mail (ex.: servidor SMTP institucional)                            |
-| `SMTP_ADMIN_EMAIL`                    | E-mail remetente (ex.: `nao-responda@…`)                                             |
-| `SMTP_SENDER_NAME`                    | Nome do remetente (ex.: `Assistente SEMA-MT`)                                        |
+O Supabase CLI (v3) está nas dependências de desenvolvimento: use sempre `npx supabase …`.
 
-A **porta SMTP** está fixa em `587` no `config.toml`, porque o CLI não aceita `env()` em
-campos numéricos. Se o provedor usar outra porta, altere em `[remotes.production.auth.email.smtp]`.
+> **CLI v3:** comandos de banco apontam para o banco **local** por padrão. Para o projeto
+> remoto, use `--remote` (ex.: `npx supabase db push --remote`). O script `npm run db:push`
+> e o workflow já fazem isso.
 
-## 2. Criar e vincular o projeto (CLI)
+## SMTP: gerenciado pelo painel
 
-```bash
-npx supabase orgs list
-```
+O SMTP próprio **não** é configurado pelo `config.toml`. Ele é mantido pelo painel em
+**Authentication → Emails → SMTP Settings**, e as credenciais nunca passam pelo repositório.
 
-```bash
-npx supabase projects create sema-chatbot --org-id <ORG_ID> --region sa-east-1 --db-password "$SUPABASE_DB_PASSWORD"
-```
+Cuidado com `npx supabase config push`: ele envia o `config.toml` para o projeto remoto.
+Antes de confirmar, leia o diff que ele mostra e **cancele se aparecer alteração de SMTP**.
+Na dúvida, altere Auth pelo painel.
 
-Anote o **Reference ID** retornado e:
+## Passo a passo (CLI)
 
-1. Troque o placeholder `project_id = "aaaaaaaaaaaaaaaaaaaa"` em `[remotes.production]`
-   do `supabase/config.toml` pelo Reference ID.
-2. Vincule e aplique:
-
-```bash
-npx supabase link --project-ref <REFERENCE_ID>
-```
+Pré-requisitos: `npx supabase login` feito e a variável de usuário `SUPABASE_DB_PASSWORD`
+definida (reinicie o terminal/app depois de criá-la).
 
 ```bash
-npx supabase db push
+npx supabase projects list
 ```
 
 ```bash
-npx supabase config push
+npx supabase link --project-ref cgwbfvfrohjkynvojcgl
 ```
-
-`config push` envia Auth, SMTP e templates. Ele mostra o que vai mudar e pede confirmação.
-
-## 3. Chaves no `.env.local`
 
 ```bash
-npx supabase projects api-keys --project-ref <REFERENCE_ID>
+npx supabase db push --remote
 ```
 
-Copie para `.env.local` (nunca versionado):
+### Chaves no `.env.local`
 
+O `.env.local` nunca é versionado. Para preenchê-lo, as chaves vêm de:
+
+```bash
+npx supabase projects api-keys --project-ref cgwbfvfrohjkynvojcgl --reveal
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://<REFERENCE_ID>.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable>
-SUPABASE_SECRET_KEY=<secret>
-```
+
+Use a chave `publishable` em `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e a `secret` em
+`SUPABASE_SECRET_KEY`. Sem `--reveal`, a chave secreta vem mascarada. Não cole a saída
+desse comando em chats, issues ou commits.
 
 Teste:
 
@@ -80,41 +76,38 @@ Teste:
 npm run health:supabase
 ```
 
-## 4. Secrets do GitHub (pela web)
+## Secrets do GitHub Actions
 
-No repositório: **Settings → Secrets and variables → Actions → New repository secret**.
-Crie os três:
+Em **Settings → Secrets and variables → Actions**, os workflows usam:
 
-| Nome                    | Valor                    |
-| ----------------------- | ------------------------ |
-| `SUPABASE_ACCESS_TOKEN` | o mesmo token da etapa 1 |
-| `SUPABASE_DB_PASSWORD`  | a senha do banco         |
-| `SUPABASE_PROJECT_ID`   | o Reference ID           |
+| Nome                    | Valor                                 |
+| ----------------------- | ------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN` | token de supabase.com → Access Tokens |
+| `SUPABASE_DB_PASSWORD`  | a senha do banco                      |
+| `SUPABASE_PROJECT_ID`   | `cgwbfvfrohjkynvojcgl`                |
 
-Depois, em **Actions → Supabase — manter ativo → Run workflow**, rode uma vez para testar.
+Teste com **Actions → Supabase — manter ativo → Run workflow**.
 
-## 5. Quando houver domínio na Vercel (TODO)
+## Quando houver domínio na Vercel (TODO)
 
-No `supabase/config.toml`, troque `site_url` e inclua o domínio em `additional_redirect_urls`
-(procure por `TODO(deploy)`). Depois rode `npx supabase config push`.
+No painel: **Authentication → URL Configuration** → troque **Site URL** e adicione o
+domínio em **Redirect URLs** (`https://<dominio>/**`). Atualize também `site_url` e
+`additional_redirect_urls` no `config.toml` (procure `TODO(deploy)`) para manter o registro.
 
-## Plano B: pelo painel
+## Pelo painel (se o CLI falhar)
 
-Se algum comando do CLI não funcionar:
-
-- **Criar projeto:** supabase.com/dashboard → **New project** → Organização → Nome `sema-chatbot`,
-  senha do banco, **Region: South America (São Paulo)** → **Create new project**.
 - **Desligar cadastro público:** **Authentication → Sign In / Providers → User Signups** →
-  desmarque **Allow new users to sign up** → **Save**. Em **Email**, deixe **Enable Email provider** ligado.
+  desmarque **Allow new users to sign up** → **Save**. Deixe **Email** ligado.
+- **Magic link de 15 min:** **Authentication → Sign In / Providers → Email** →
+  **Email OTP Expiration** `900` → **Save**.
 - **URLs:** **Authentication → URL Configuration** → **Site URL** `http://localhost:3000`;
   **Redirect URLs → Add URL** `http://localhost:3000/**`.
-- **SMTP:** **Authentication → Emails → SMTP Settings** → **Enable Custom SMTP** → preencha
-  host, porta, usuário, senha, remetente → **Save**.
 - **Templates:** **Authentication → Emails → Templates → Magic Link** e **Invite user** → cole o
   HTML de `supabase/templates/` e o assunto do `config.toml` → **Save**.
 - **Bucket:** **Storage → New bucket** → nome `sources`, **Public** desligado, **Restrict file size**
-  `25 MB`, **Allowed MIME types** `application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
-- **Extensão vector:** **Database → Extensions** → procure `vector` → ligar (schema `extensions`).
+  `25 MB`, **Allowed MIME types**
+  `application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
+- **Extensão vector:** **Database → Extensions** → `vector` → ligar (schema `extensions`).
 
 ## Observações
 

@@ -73,7 +73,8 @@ Supabase (CLI em devDependencies, use `npx supabase …`; guia em `docs/setup-su
 
 - `npm run db:new <nome>` cria migration em `supabase/migrations/`; `npm run db:push` aplica no projeto vinculado (na `main`, o workflow `supabase-migrations.yml` aplica sozinho).
 - `npm run health:supabase` testa Auth, banco e bucket `sources` usando o `.env.local`.
-- Auth, SMTP e templates ficam em `supabase/config.toml` / `supabase/templates/` e sobem com `npx supabase config push`. O SMTP fica em `[remotes.production]` e lê `SMTP_*` do ambiente.
+- Auth e templates ficam em `supabase/config.toml` / `supabase/templates/`. SMTP é gerenciado pelo painel do Supabase (não pelo config.toml); revise o diff antes de qualquer `npx supabase config push`.
+- CLI v3: comandos de banco usam o banco local por padrão; para o remoto use `--remote`.
 
 Hooks (Husky): `pre-commit` roda lint-staged (ESLint + Prettier nos arquivos alterados); `commit-msg` roda commitlint (Conventional Commits).
 

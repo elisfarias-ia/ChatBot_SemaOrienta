@@ -17,7 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "prepare": "husky",
     "health:supabase": "node --env-file=.env.local scripts/health-check.mjs",
-    "db:push": "supabase db push",
+    "db:push": "supabase db push --remote",
     "db:new": "supabase migration new"
   },
   "dependencies": {

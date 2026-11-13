@@ -35,4 +35,4 @@ jobs:
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
 
       - name: Aplicar migrations pendentes
-        run: supabase db push
+        run: supabase db push --remote

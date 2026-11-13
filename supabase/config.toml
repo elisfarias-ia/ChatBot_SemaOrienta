@@ -245,8 +245,8 @@ otp_length = 6
 # Magic link expira em 15 minutos (ADR 003).
 otp_expiry = 900
 
-# SMTP próprio: configurado só no projeto remoto (ver [remotes.production] no fim do arquivo).
-# Localmente os e-mails caem no Mailpit (http://127.0.0.1:54324).
+# SMTP do projeto remoto é gerenciado pelo painel (Authentication > Emails > SMTP Settings),
+# não por este arquivo. Localmente os e-mails caem no Mailpit (http://127.0.0.1:54324).
 
 # Templates de e-mail em pt-BR.
 [auth.email.template.magic_link]
@@ -428,22 +428,3 @@ enabled = true
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
 
-# =============================================================================
-# Projeto remoto (produção). Sobrescreve as configurações acima quando o alvo
-# é este projeto (`supabase config push`).
-# TODO(setup): trocar pelo Reference ID do projeto (Settings > General).
-# =============================================================================
-[remotes.production]
-project_id = "aaaaaaaaaaaaaaaaaaaa" # TODO(setup): placeholder
-
-# SMTP próprio. Valores lidos do ambiente na hora do `supabase config push`.
-# Nunca coloque valores reais aqui.
-[remotes.production.auth.email.smtp]
-enabled = true
-host = "env(SMTP_HOST)"
-# Porta fixa: o CLI não aceita env() em campos numéricos. Ajuste se o provedor usar 465.
-port = 587
-user = "env(SMTP_USER)"
-pass = "env(SMTP_PASS)"
-admin_email = "env(SMTP_ADMIN_EMAIL)"
-sender_name = "env(SMTP_SENDER_NAME)"
