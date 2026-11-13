@@ -64,6 +64,15 @@ Para um secret avulso:
 npm run secrets:set -- NOME_DO_SECRET
 ```
 
+## Rodar um workflow manualmente
+
+```bash
+npm run workflow:run -- supabase-keepalive.yml
+```
+
+Dispara o workflow na `main` (`workflow_dispatch`), acompanha até terminar e, se falhar,
+mostra o passo que quebrou e o link do log. Atalho para as migrations: `npm run db:migrate:ci`.
+
 ## Quando é preciso ação humana
 
 - **Primeiro login do Git Credential Manager:** se não houver credencial salva, o script para

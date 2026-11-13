@@ -22,7 +22,9 @@
     "ship": "node scripts/github.mjs pr:ship",
     "repo:setup": "node scripts/github.mjs repo:setup",
     "secrets:set": "node scripts/github.mjs secrets:set",
-    "secrets:sync": "node scripts/github.mjs secrets:sync"
+    "secrets:sync": "node scripts/github.mjs secrets:sync",
+    "workflow:run": "node scripts/github.mjs workflow:run",
+    "db:migrate:ci": "node scripts/github.mjs workflow:run supabase-migrations.yml"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

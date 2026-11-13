@@ -7,7 +7,11 @@
  *  1. Auth responde (chave pública).
  *  2. Banco responde via PostgREST (chave secreta).
  *  3. Bucket "sources" existe, é privado, limite 25 MB e aceita só PDF/DOCX.
+ *  4. Extensão "vector" instalada (via `supabase db query --remote`, que usa HTTPS;
+ *     requer `npx supabase login` e `npx supabase link` feitos nesta máquina).
  */
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { publicEnvSchema, serverEnvSchema } from "../src/lib/env.js";
 
@@ -36,6 +40,31 @@ function get(url, key) {
   // Chaves antigas (JWT) também precisam ir no Authorization.
   if (key.startsWith("eyJ")) Object.assign(headers, { Authorization: `Bearer ${key}` });
   return fetch(url, { headers, signal: AbortSignal.timeout(10_000) });
+}
+
+const SUPABASE_CLI = fileURLToPath(
+  new URL("../node_modules/supabase/dist/supabase.js", import.meta.url),
+);
+
+/**
+ * Executa uma consulta só de leitura no projeto vinculado, sem shell.
+ * @param {string} sql
+ * @returns {Array<Record<string, unknown>>}
+ */
+function remoteQuery(sql) {
+  const result = spawnSync(
+    process.execPath,
+    [SUPABASE_CLI, "db", "query", "--remote", "--read-only", sql],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 60_000 },
+  );
+  const out = result.stdout ?? "";
+  const start = out.indexOf("{");
+  if (result.status !== 0 || start < 0) {
+    throw new Error(`supabase db query falhou: ${(result.stderr || out).trim().slice(-300)}`);
+  }
+  /** @type {{ rows?: Array<Record<string, unknown>> }} */
+  const data = JSON.parse(out.slice(start));
+  return data.rows ?? [];
 }
 
 /**
@@ -95,6 +124,11 @@ async function main() {
         problems.push("tipos de arquivo diferentes");
       if (problems.length) throw new Error(problems.join("; "));
       return "privado, 25 MB, PDF/DOCX";
+    }),
+    await run('Extensão "vector"', async () => {
+      const rows = remoteQuery("select extversion from pg_extension where extname = 'vector'");
+      if (!rows.length) throw new Error("não instalada");
+      return `versão ${String(rows[0].extversion)}`;
     }),
   ];
 
