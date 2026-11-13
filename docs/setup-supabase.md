@@ -7,12 +7,12 @@
 | Nome         | `ChatBot_SemaOrienta`                      |
 | Reference ID | `cgwbfvfrohjkynvojcgl`                     |
 | URL          | `https://cgwbfvfrohjkynvojcgl.supabase.co` |
-| Região atual | `us-east-1` (ver aviso abaixo)             |
+| Região       | `us-east-1` (ver ADR 006)                  |
 | Postgres     | 17                                         |
 
-> **Aviso de região:** o projeto foi criado em **us-east-1 (EUA)**, não em
-> **sa-east-1 (São Paulo)**. A região não pode ser alterada depois de criada; para
-> mudar, é preciso criar um novo projeto em São Paulo e repetir este guia.
+> **Região:** o projeto fica em **us-east-1 (EUA)**, por decisão registrada no
+> [ADR 006](adr/006-supabase-em-us-east-1.md). A região não pode ser alterada depois;
+> mudar exige criar outro projeto em São Paulo e repetir este guia.
 
 ## O que está no repositório
 
