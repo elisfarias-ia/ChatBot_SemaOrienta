@@ -1,0 +1,9 @@
+# Responsáveis pela revisão de código. A última regra que casar vence.
+# Docs: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*                @elisfarias-ia
+
+# Áreas sensíveis (pipeline, configuração e decisões de arquitetura)
+/.github/        @elisfarias-ia
+/src/lib/env.js  @elisfarias-ia
+/docs/adr/       @elisfarias-ia
