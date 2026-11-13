@@ -1,75 +1,78 @@
-# Configuração do GitHub (pela web)
+# Configuração do GitHub
 
-Repositório: <https://github.com/elisfarias-ia/ChatBot_SemaOrienta>
+Repositório (público): <https://github.com/elisfarias-ia/ChatBot_SemaOrienta>
+
+Tudo é feito por `scripts/github.mjs`, sem `gh` e sem abrir o site. O script usa a
+credencial do GitHub já salva no **Git Credential Manager** (a mesma do `git push`),
+obtida em tempo de execução por `git credential fill`. O token fica só em memória:
+nunca é impresso, gravado, commitado nem passado por argumento.
 
 ## Fluxo de trabalho
 
-1. Toda mudança é feita numa branch `feat/*` (ou `fix/*`, `chore/*`).
-2. `git push -u origin feat/minha-branch`.
-3. O `git push` imprime um link `…/pull/new/feat/minha-branch`. Abra-o e crie o PR.
-4. Espere o CI ficar verde e faça o merge (de preferência **Squash and merge**).
+1. Crie uma branch `feat/*` (ou `fix/*`, `chore/*`, `docs/*`) a partir da `main` atualizada.
+2. Antes de entregar, rode localmente:
 
-## Proteger a branch `main`
+   ```bash
+   npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e
+   ```
 
-> **Atenção:** em repositório **privado**, proteção de branch e rulesets só funcionam
-> em conta **GitHub Pro, Team ou Enterprise**. Na conta gratuita, a página aparece,
-> mas as regras não são aplicadas. Em repositório público funcionam em qualquer plano.
+3. Faça commit (Conventional Commits) e entregue:
 
-**Antes de começar:** os checks só aparecem na lista depois de rodarem pelo menos
-uma vez. Abra o PR da branch `feat/ci-github` e espere o CI terminar.
+   ```bash
+   npm run ship
+   ```
 
-### Opção A — Ruleset (recomendado)
+`npm run ship` faz, nesta ordem:
 
-1. No repositório, clique em **Settings** (Configurações).
-2. No menu da esquerda: **Rules → Rulesets**.
-3. Clique em **New ruleset → New branch ruleset**.
-4. Preencha:
-   - **Ruleset name:** `Proteger main`
-   - **Enforcement status:** `Active`
-5. Em **Target branches**, clique em **Add target → Include default branch**.
-6. Em **Branch rules**, marque:
-   - ✅ **Restrict deletions** (impede apagar a `main`)
-   - ✅ **Block force pushes**
-   - ✅ **Require a pull request before merging**
-     - **Required approvals:** `0` se você trabalha sozinha; `1` se houver outra pessoa para revisar.
-     - Opcional: ✅ **Require review from Code Owners** (usa o arquivo `.github/CODEOWNERS`).
-   - ✅ **Require status checks to pass**
-     - ✅ **Require branches to be up to date before merging**
-     - Clique em **Add checks** e adicione os dois:
-       - `Qualidade e build`
-       - `E2E (Playwright)`
-7. Clique em **Create**.
+1. push da branch atual;
+2. cria o PR para a `main` (título = último commit; corpo = lista de commits + checklist
+   do template), ou reaproveita o PR aberto;
+3. espera os checks do CI (até 25 min; ajuste com `SHIP_TIMEOUT_MIN`);
+4. **se todos passarem:** merge (merge commit), apaga a branch remota, volta para a `main`,
+   `git pull` e apaga a branch local;
+5. **se algum falhar:** não faz merge e mostra o check que falhou e o link do log.
 
-### Opção B — Branch protection rule (modo clássico)
+## Configuração do repositório
 
-1. **Settings → Branches → Add branch protection rule** (ou **Add classic branch protection rule**).
-2. **Branch name pattern:** `main`
-3. Marque:
-   - ✅ **Require a pull request before merging** (ajuste o número de aprovações como acima)
-   - ✅ **Require status checks to pass before merging**
-     - ✅ **Require branches to be up to date before merging**
-     - Na busca, adicione `Qualidade e build` e `E2E (Playwright)`
-   - ✅ **Do not allow bypassing the above settings** (vale também para administradores)
-4. Clique em **Create**.
+```bash
+npm run repo:setup
+```
 
-## Como conferir
+- **Workflow permissions:** leitura e escrita.
+- **Apagar branch após o merge:** ligado.
+- **Proteção da `main`** (só em repositório público; em privado o plano gratuito não aplica):
+  PR obrigatório, branch atualizada com a `main`, checks `Qualidade e build` e
+  `E2E (Playwright)` verdes, sem force push e sem apagar a `main`. Vale também para administradores.
 
-- Tente `git push origin main` direto: deve ser **recusado**.
-- Num PR com CI vermelho, o botão de merge deve ficar **bloqueado**.
+Para conferir: `git push origin main` direto deve ser **recusado**.
 
-## Outras configurações recomendadas
+## Secrets do Actions
 
-- **Settings → General → Pull Requests:** deixe só **Allow squash merging** e marque
-  **Automatically delete head branches**.
-- **Settings → Code security:** ative **Dependabot alerts** e **Dependabot security updates**
-  (as atualizações semanais já estão em `.github/dependabot.yml`).
-- **Settings → Actions → General → Workflow permissions:** `Read repository contents`.
+Usados pelos workflows do Supabase. `npm run secrets:sync` cadastra todos os desta tabela,
+lendo cada valor de uma variável de ambiente ou do `.env.local`. Se o valor não existir
+localmente, o secret atual no GitHub é mantido.
+
+| Secret                  | Origem do valor                                             |
+| ----------------------- | ----------------------------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN` | token de supabase.com → Account preferences → Access Tokens |
+| `SUPABASE_DB_PASSWORD`  | senha do banco do projeto Supabase                          |
+| `SUPABASE_PROJECT_ID`   | Reference ID do projeto (`cgwbfvfrohjkynvojcgl`)            |
+
+Para um secret avulso:
+
+```bash
+npm run secrets:set -- NOME_DO_SECRET
+```
+
+## Quando é preciso ação humana
+
+- **Primeiro login do Git Credential Manager:** se não houver credencial salva, o script para
+  e pede um `git push` manual, que abre o navegador para você entrar no GitHub (só você pode
+  autenticar a sua conta).
+- **Valores de segredos** que só existem fora da máquina (ex.: token do Supabase): precisam
+  estar no ambiente ou no `.env.local` para o `secrets:sync` conseguir cadastrar.
 
 ## E-mail dos commits
 
-O GitHub bloqueia push com e-mail privado. Este repositório usa o e-mail
-`noreply` do GitHub, configurado só nele:
-
-```bash
-git config user.email "340184059+elisfarias-ia@users.noreply.github.com"
-```
+O GitHub bloqueia push com e-mail privado. O git global desta máquina usa o e-mail
+`noreply` do GitHub: `340184059+elisfarias-ia@users.noreply.github.com`.

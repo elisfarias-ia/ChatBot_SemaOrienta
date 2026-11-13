@@ -18,7 +18,11 @@
     "prepare": "husky",
     "health:supabase": "node --env-file=.env.local scripts/health-check.mjs",
     "db:push": "supabase db push --remote",
-    "db:new": "supabase migration new"
+    "db:new": "supabase migration new",
+    "ship": "node scripts/github.mjs pr:ship",
+    "repo:setup": "node scripts/github.mjs repo:setup",
+    "secrets:set": "node scripts/github.mjs secrets:set",
+    "secrets:sync": "node scripts/github.mjs secrets:sync"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -47,6 +51,7 @@
     "eslint-config-next": "16.4.6",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
+    "libsodium-wrappers": "^0.8.4",
     "lint-staged": "^16.4.0",
     "prettier": "^3.10.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
