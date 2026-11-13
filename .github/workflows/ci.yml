@@ -52,7 +52,7 @@ jobs:
           retention-days: 7
 
       - name: Cache do build do Next.js
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .next/cache
           key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: Cache dos navegadores do Playwright
         id: pw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
